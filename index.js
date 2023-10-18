@@ -28,6 +28,13 @@ async function run() {
 
     const brandCollections = client.db("myDB").collection("brands");
 
+    // Get brands data to database
+    app.get("/brands", async (req, res) => {
+      const cursor = brandCollections.find({});
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // Send brands data to database
     app.post("/brands", async (req, res) => {
       const brand = req.body;
