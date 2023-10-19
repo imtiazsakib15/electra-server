@@ -27,6 +27,7 @@ async function run() {
     await client.connect();
 
     const brandCollections = client.db("myDB").collection("brands");
+    const productCollections = client.db("myDB").collection("products");
 
     // Get brands data to database
     app.get("/brands", async (req, res) => {
@@ -38,10 +39,14 @@ async function run() {
     // Send brands data to database
     app.post("/brands", async (req, res) => {
       const brand = req.body;
-      console.log(brand);
-
       const result = await brandCollections.insertOne(brand);
-      console.log(result);
+      res.send(result);
+    });
+
+    // Send products data to database
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      const result = await productCollections.insertOne(product);
       res.send(result);
     });
 
