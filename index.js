@@ -43,6 +43,13 @@ async function run() {
       res.send(result);
     });
 
+    // Get products data to database
+    app.get("/products", async (req, res) => {
+      const cursor = productCollections.find({});
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // Send products data to database
     app.post("/products", async (req, res) => {
       const product = req.body;
