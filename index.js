@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
 const app = express();
@@ -9,7 +10,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jnjhgs0.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -29,7 +29,7 @@ async function run() {
     const brandCollections = client.db("myDB").collection("brands");
     const productCollections = client.db("myDB").collection("products");
 
-    // Get brands data to database
+    // Get brands data from database
     app.get("/brands", async (req, res) => {
       const cursor = brandCollections.find({});
       const result = await cursor.toArray();
@@ -43,17 +43,36 @@ async function run() {
       res.send(result);
     });
 
-    // Get products data to database
+    // Get products data from database
     app.get("/products", async (req, res) => {
       const cursor = productCollections.find({});
       const result = await cursor.toArray();
       res.send(result);
     });
 
+    // Get products data filtering by brand from database
+    app.get("/:brand/products", async (req, res) => {
+      const brand = req.params.brand;
+      const query = { brand_name: brand };
+
+      const products = await productCollections.find(query).toArray();
+      res.send(products);
+    });
+
+    // Get product data filtering by id from database
+    app.get("/:brand/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const product = await productCollections.findOne(query);
+      res.send(product);
+    });
+
     // Send products data to database
     app.post("/products", async (req, res) => {
       const product = req.body;
       const result = await productCollections.insertOne(product);
+      console.log(result);
       res.send(result);
     });
 
