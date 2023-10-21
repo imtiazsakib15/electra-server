@@ -70,6 +70,15 @@ async function run() {
       res.send(product);
     });
 
+    // Get product data filtering by id from database---------------------------
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const product = await productCollections.findOne(query);
+      res.send(product);
+    });
+
     // Send products data to database
     app.post("/products", async (req, res) => {
       const product = req.body;
