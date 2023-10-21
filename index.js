@@ -1,9 +1,10 @@
 const express = require("express");
-const cors = require("cors");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-require("dotenv").config();
-
 const app = express();
+
+const cors = require("cors");
+require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+
 const port = process.env.PORT || 5000;
 
 // Middleware
@@ -28,6 +29,7 @@ async function run() {
 
     const brandCollections = client.db("myDB").collection("brands");
     const productCollections = client.db("myDB").collection("products");
+    const cartDetailsCollections = client.db("myDB").collection("cart");
 
     // Get brands data from database
     app.get("/brands", async (req, res) => {
@@ -93,10 +95,38 @@ async function run() {
           description: product.description,
         },
       };
-
       const result = await productCollections.updateOne(
         filter,
         updateProduct,
+        option
+      );
+      console.log(result);
+      res.send(result);
+    });
+
+    // Get cart data filtering by email from database
+    app.get("/cart/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+
+      const product = (await cartDetailsCollections.findOne(query)) || {};
+      res.send(product);
+    });
+
+    // Send cart details to database
+    app.patch("/cart", async (req, res) => {
+      const cartDetails = req.body;
+      const filter = { email: cartDetails.email };
+      const option = { upsert: true };
+      const updateCartDetails = {
+        $set: {
+          email: cartDetails.email,
+          cartProducts: cartDetails.cartProducts,
+        },
+      };
+      const result = await cartDetailsCollections.updateOne(
+        filter,
+        updateCartDetails,
         option
       );
       console.log(result);
